@@ -1,16 +1,41 @@
-*.pyc
+# Python
 __pycache__/
+*.py[cod]
 *.pyo
 *.pyd
 *.env
+*.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.python-version
 
-db.sqlite3
+# Django
 *.log
 *.pot
-*.py[co]
+*.pyc
+*.pyo
+*.pyd
 *.sqlite3
-*.mo
+db.sqlite3
+media/
 
-venv/
-env/
+# Migrations
+*/migrations/*
 
+# If you're using django-debug-toolbar
+debug.log
+
+# PyCharm
+.idea/
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# Byte-compiled / optimized / DLL files
+*.py[cod]
