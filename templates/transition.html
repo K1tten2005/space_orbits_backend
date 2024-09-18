@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<main>
+    <section class="content">
+        <h1>Составление перехода на орбиты</h1>
+        <div class="orbit-info">
+            {% for orbit in transition.orbits %}
+            <a href="/orbits/{{ orbit.id }}/" class="orbit-link">
+            <div class="orbit-item">
+                <img src="{{ orbit.image }}" alt="Орбита {{ orbit.orbit_height }}} км">
+                <div class="info">
+                    <h2>Высота {{ orbit.orbit_height }} км</h2>
+                    <p>Является частью низкой околоземной орбиты (160-2000 км).</p>
+                </div>
+            </div>
+            </a>
+            <hr class="separator">
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}

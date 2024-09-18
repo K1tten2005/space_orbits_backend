@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<main>
+    <div class="search-cart-container">
+        <form method="GET" action=".">
+            <input type="text" placeholder="Поиск орбиты по высоте..." name="orbit_height" value="{{ orbit_height }}">
+        </form>
+        <h2>Орбиты</h2>
+        <a href="/transition/{{ draft_transition.id }}/">
+        <div class="cart">
+            <img src="http://127.0.0.1:9000/orbits/cart.png" alt="Корзина">
+             <span class="badge">
+                    {{ orbits_to_transfer }}
+             </span>
+        </div>
+        </a>
+    </div>
+    <div class="orbit-container">
+        {% for orbit in orbits %}
+            <a href="/orbits/{{ orbit.id }}/" class="orbit-link">
+            <div class="orbit-card">
+                <img src='{{ orbit.image }}' alt="Орбита {{ orbit.orbit_height }} км">
+                <h3>Высота {{ orbit.orbit_height }} км</h3>
+                <p>{{ orbit.short_description }}</p>
+            </div>
+            </a>
+        {% endfor %}
+    </div>
+</main>
+{% endblock %}

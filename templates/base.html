@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Космоорбит</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/orbits.css' %}">
+</head>
+<body>
+    <header>
+        <a href="/orbits/" class="orbit-link">
+        <div class="logo">
+            <img src="http://127.0.0.1:9000/orbits/logo.png" alt="Логотип Космоорбит">
+            <h1>Космоорбит</h1>
+        </div>
+        </a>
+    </header>
+
+    {% block content %}
+    {% endblock %}
+
+</body>
+</html>
+
