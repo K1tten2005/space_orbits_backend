@@ -23,7 +23,12 @@ def orbit(request, orbit_id):
 
 def transition(request, transition_id):
     transition = get_transition_by_id(transition_id)
-    return render(request, 'transition.html', {'transition': transition})
+    orbits = []
+    for orbit_id in transition['orbits']:
+        orbit = get_orbit_by_id(orbit_id)
+        if orbit:
+            orbits.append(orbit)
+    return render(request, 'transition.html', {'transition': transition, 'orbits': orbits})
 
 
 def get_orbit_by_id(orbit_id):

@@ -4,7 +4,7 @@
     <section class="content">
         <h1>Составление перехода на орбиты</h1>
         <div class="orbit-info">
-            {% for orbit in transition.orbits %}
+            {% for orbit in orbits %}
             <a href="/orbits/{{ orbit.id }}/" class="orbit-link">
             <div class="orbit-item">
                 <img src="{{ orbit.image }}" alt="Орбита {{ orbit.orbit_height }}} км">
@@ -18,5 +18,12 @@
             {% endfor %}
         </div>
     </section>
+    <form>
+        <h2 class="spacecraft">Космический аппарат: <input type="text" value="{{ transition.spacecraft }}"></h2>
+        <div class="date-container">
+            <h2 class="date">Дата перехода: <input type="text" value="{{ transition.planned_date }}"></h2>
+            <h2 class="date">Время перехода: <input type="text" value="{{ transition.planned_time }}"></h2>
+        </div>
+    </form>
 </main>
 {% endblock %}

@@ -126,20 +126,11 @@ h2 {
 
 
 /* orbit.html */
-.breadcrumb {
-    display: flex;
-    justify-content: space-between;
-    font-size: 25px;
-    padding-bottom: 30px;
-    padding-top: 20px;
-    padding-left: 150px;
-
-}
-
 .orbit-details {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: 50px;
 }
 
 .orbit-image img {
@@ -152,7 +143,6 @@ h2 {
 
 .orbit-info {
     text-align: start;
-    margin-left: 10px;
 }
 
 .orbit-info h2 {
@@ -182,6 +172,17 @@ h2 {
     margin-top: 15px;
     margin-bottom: 30px;
 }
+
+.date {
+    font-size: 24px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+}
+.spacecraft {
+    font-size: 26px;
+    margin-bottom: 20px;
+}
+
 
 /* из nasa */
 .orbit-info {

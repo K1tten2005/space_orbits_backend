@@ -1,10 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 <main>
-    <div class="breadcrumb">
-        <p><a href="/orbits/">Доступные орбиты</a> / <span>Высота {{ orbit.orbit_height }} км</span></p>
-    </div>
-
     <div class="orbit-details">
         <div class="orbit-image">
             <img src="{{ orbit.image }}" alt="Орбита {{ orbit.orbit_height }} км">
