@@ -223,3 +223,9 @@ h2 {
     margin-top: 10px;
     width: 1300px;
 }
+
+.date-container{
+
+    display: flex;
+    justify-content: space-evenly;
+}

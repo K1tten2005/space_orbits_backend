@@ -6,24 +6,41 @@
             <input type="text" placeholder="Поиск орбиты по высоте..." name="orbit_height" value="{{ orbit_height }}">
         </form>
         <h2>Орбиты</h2>
-        <a href="/transition/{{ draft_transition.id }}/">
-        <div class="cart">
-            <img src="http://127.0.0.1:9000/orbits/cart.png" alt="Корзина">
-             <span class="badge">
-                    {{ orbits_to_transfer }}
-             </span>
-        </div>
-        </a>
+        {% if orbits_to_transfer > 0 %}
+            <a href="/transition/{{ draft_transition.id }}/">
+            <div class="cart">
+                <img src="http://127.0.0.1:9000/orbits/cart.png" alt="Корзина">
+                 <span class="badge">
+                        {{ orbits_to_transfer }}
+                 </span>
+            </div>
+            </a>
+        {% else %}
+            <div class="cart">
+                <img src="http://127.0.0.1:9000/orbits/cart.png" alt="Корзина">
+            </div>
+        {% endif %}
     </div>
     <div class="orbit-container">
         {% for orbit in orbits %}
-            <a href="/orbits/{{ orbit.id }}/" class="orbit-link">
             <div class="orbit-card">
-                <img src='{{ orbit.image }}' alt="Орбита {{ orbit.orbit_height }} км">
-                <h3>Высота {{ orbit.orbit_height }} км</h3>
+                <a href="/orbits/{{ orbit.id }}/" class="orbit-link">
+                <img src='{{ orbit.image }}' alt="Орбита {{ orbit.height }} км">
+                <h3>Высота {{ orbit.height }} км</h3>
                 <p>{{ orbit.short_description }}</p>
+                </a>
+                <div class="add-button">
+                    {% if orbit.added %}
+                        <button type="button" class="btn btn-success" disabled>Добавлено</button>
+                    {% else %}
+                        <form method="post" action="/orbits/{{ orbit.id }}/add_orbit/" class="col d-flex justify-content-center">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-dark" >Добавить в переход</button>
+                        </form>
+                    {% endif %}
+                </div>
+
             </div>
-            </a>
         {% endfor %}
     </div>
 </main>

@@ -27,6 +27,8 @@ urlpatterns = [
     path('orbits/', views.orbits, name='orbits'),
     path('orbits/<int:orbit_id>/', views.orbit, name='orbit'),
     path('transition/<int:transition_id>/', views.transition, name='transition'),
+    path('transition/<int:transition_id>/delete/', views.delete, name='transition_delete'),
+    path('orbits/<int:orbit_id>/add_orbit/', views.add_orbit, name='transition'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_URL)

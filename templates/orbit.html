@@ -3,12 +3,12 @@
 <main>
     <div class="orbit-details">
         <div class="orbit-image">
-            <img src="{{ orbit.image }}" alt="Орбита {{ orbit.orbit_height }} км">
+            <img src="{{ orbit.image }}" alt="Орбита {{ orbit.height }} км">
         </div>
         <div class="orbit-info">
-            <h2>Высота {{ orbit.orbit_height }} км</h2>
+            <h2>Высота {{ orbit.height }} км</h2>
             <p>{{ orbit.full_description }}</p>
-            <p>Тип орбиты: {{ orbit.orbit_type }}</p>
+            <p>Тип орбиты: {{ orbit.type }}</p>
         </div>
     </div>
 </main>

@@ -3,6 +3,5 @@ DRAFT_TRANSITION = {
     'planned_date': '01.12.2024',
     'planned_time': '10:30:06',
     'spacecraft': 'Спутник-1',
-    'orbits_sequence': '',
     'orbits': [1, 3],
 }
