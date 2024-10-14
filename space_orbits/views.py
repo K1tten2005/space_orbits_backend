@@ -73,7 +73,10 @@ def transition(request, transition_id):
     if not transition:
         return redirect('orbits')
 
-    orbits = list(transition.orbits.all())
+    orbit_transitions = OrbitTransition.objects.filter(transition=transition).order_by('position')
+
+    orbits = [ot.orbit for ot in orbit_transitions]
+
     return render(request, 'transition.html', {'transition': transition, 'orbits': orbits,
                                                'num_of_orbits': len(orbits)})
 

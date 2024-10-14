@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import UniqueConstraint
 
 
 class Orbit(models.Model):
@@ -48,6 +49,9 @@ class OrbitTransition(models.Model):
 
     class Meta:
         unique_together = ('orbit', 'transition')
+        constraints = [
+            UniqueConstraint(fields=['orbit', 'position'], name='unique_position_per_transition')
+        ]
 
     def __str__(self):
         return f"OrbitTransition (Orbit {self.orbit.id} - Transition {self.transition.id}, Position {self.position})"
