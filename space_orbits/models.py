@@ -8,7 +8,7 @@ class Orbit(models.Model):
     type = models.CharField(max_length=75, verbose_name='Тип орбиты')
     full_description = models.TextField(verbose_name='Полное описание')
     short_description = models.CharField(max_length=200, verbose_name='Короткое описание')
-    image = models.URLField(verbose_name='Изображение')
+    image = models.URLField(null=True, verbose_name='Изображение')
 
     STATUS_CHOICES = [
         (True, 'Действует'),
