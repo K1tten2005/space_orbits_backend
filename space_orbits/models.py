@@ -23,7 +23,7 @@ class Orbit(models.Model):
 class Transition(models.Model):
     planned_date = models.DateField(verbose_name='Запланированная дата')
     planned_time = models.TimeField(verbose_name='Запланированное время')
-    spacecraft = models.CharField(max_length=50, verbose_name='Космический аппарат')
+    spacecraft = models.CharField(null=True, max_length=50, verbose_name='Космический аппарат')
     user = models.ForeignKey(User, related_name='transitions', on_delete=models.CASCADE, verbose_name='Пользователь')
     moderator = models.ForeignKey(User, related_name='moderated_transitions', on_delete=models.SET_NULL,
                                   null=True, verbose_name='Модератор')
@@ -50,7 +50,7 @@ class OrbitTransition(models.Model):
     class Meta:
         unique_together = ('orbit', 'transition')
         constraints = [
-            UniqueConstraint(fields=['orbit', 'position'], name='unique_position_per_transition')
+            UniqueConstraint(fields=['transition', 'position'], name='unique_position_per_transition')
         ]
 
     def __str__(self):
