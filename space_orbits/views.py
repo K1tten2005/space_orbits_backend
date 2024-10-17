@@ -8,14 +8,13 @@ from django.utils import timezone
 from django.contrib.auth import authenticate
 from .minio import *
 
+
 def get_user():
     return User.objects.filter(is_superuser=False).first()
 
 
 def get_moderator():
     return User.objects.filter(is_superuser=True).first()
-
-
 
 
 @api_view(['GET'])
@@ -36,6 +35,7 @@ def get_orbits_list(request):
     }
     return Response(response, status=status.HTTP_200_OK)
 
+
 @api_view(['GET'])
 def get_orbit_by_id(request, orbit_id):
     try:
@@ -46,6 +46,7 @@ def get_orbit_by_id(request, orbit_id):
     serializer = OrbitSerializer(orbit, many=False)
     return Response(serializer.data)
 
+
 @api_view(['POST'])
 def create_orbit(request):
     orbit_data = request.data.copy()
@@ -55,6 +56,7 @@ def create_orbit(request):
 
     new_orbit = serializer.save()
     return Response(OrbitSerializer(new_orbit).data, status=status.HTTP_201_CREATED)
+
 
 @api_view(['PUT'])
 def update_orbit(request, orbit_id):
@@ -78,6 +80,7 @@ def update_orbit(request, orbit_id):
 
     return Response(OrbitSerializer(updated_orbit).data, status=status.HTTP_200_OK)
 
+
 @api_view(['DELETE'])
 def delete_orbit(request, orbit_id):
     try:
@@ -91,6 +94,7 @@ def delete_orbit(request, orbit_id):
     orbits = Orbit.objects.filter(status=True)
     serializer = OrbitSerializer(orbits, many=True)
     return Response(serializer.data)
+
 
 @api_view(['POST'])
 def add_orbit_to_transition(request, orbit_id):
@@ -120,7 +124,8 @@ def add_orbit_to_transition(request, orbit_id):
             position=len(draft_transition.orbits.all()) + 1,
         )
     except Exception as e:
-        return Response({'error': f'Ошибка при создании связки: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': f'Ошибка при создании связки: {str(e)}'},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     serializer = TransitionSerializer(draft_transition)
     return Response(serializer.data.get('orbits', []), status=status.HTTP_200_OK)
@@ -145,6 +150,7 @@ def update_orbit_image(request, orbit_id):
 
     return Response({"error": "Изображение не предоставлено"}, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(["GET"])
 def get_transitions_list(request):
     status = request.GET.get("status", '')
@@ -166,6 +172,7 @@ def get_transitions_list(request):
 
     return Response(serializer.data)
 
+
 @api_view(["GET"])
 def get_transition_by_id(request, transition_id):
     try:
@@ -176,6 +183,7 @@ def get_transition_by_id(request, transition_id):
     serializer = TransitionSerializer(transition, many=False)
 
     return Response(serializer.data)
+
 
 @api_view(["PUT"])
 def update_transition(request, transition_id):
@@ -200,6 +208,7 @@ def update_transition(request, transition_id):
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(["PUT"])
 def update_status_user(request, transition_id):
     try:
@@ -208,7 +217,8 @@ def update_status_user(request, transition_id):
         return Response({"error": "Переход не найден"}, status=status.HTTP_404_NOT_FOUND)
 
     if transition.status != 'draft':
-        return Response({"error": "Переход нельзя изменить, так как он не в статусе 'Черновик'"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response({"error": "Переход нельзя изменить, так как он не в статусе 'Черновик'"},
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     required_fields = ['planned_date', 'planned_time', 'spacecraft']
 
@@ -226,6 +236,7 @@ def update_status_user(request, transition_id):
 
     serializer = TransitionSerializer(transition, many=False)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 @api_view(["PUT"])
 def update_status_admin(request, transition_id):
@@ -250,6 +261,7 @@ def update_status_admin(request, transition_id):
 
     return Response(serializer.data)
 
+
 @api_view(["DELETE"])
 def delete_transition(request, transition_id):
     try:
@@ -265,6 +277,7 @@ def delete_transition(request, transition_id):
     serializer = TransitionSerializer(transition, many=False)
 
     return Response(serializer.data)
+
 
 @api_view(["DELETE"])
 def delete_orbit_from_transition(request, orbit_transition_id):
@@ -286,6 +299,7 @@ def delete_orbit_from_transition(request, orbit_transition_id):
 
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 @api_view(["PUT"])
 def update_orbit_transition(request, orbit_transition_id):
     try:
@@ -303,6 +317,7 @@ def update_orbit_transition(request, orbit_transition_id):
 
     return Response({"error": "Позиция не предоставлена"}, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(["POST"])
 def register(request):
     serializer = UserRegisterSerializer(data=request.data)
@@ -314,6 +329,7 @@ def register(request):
 
     serializer = UserSerializer(user)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 @api_view(["PUT"])
 def update_user(request, user_id):
@@ -329,6 +345,7 @@ def update_user(request, user_id):
     serializer.save()
 
     return Response(serializer.data)
+
 
 @api_view(["POST"])
 def login(request):
