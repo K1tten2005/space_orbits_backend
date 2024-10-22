@@ -5,6 +5,7 @@ from .models import *
 from django.utils.dateparse import parse_datetime
 from rest_framework.decorators import api_view
 from django.utils import timezone
+from django.db.models import Max
 from django.contrib.auth import authenticate
 from .minio import *
 
@@ -31,7 +32,6 @@ def get_orbits_list(request):
         'orbits': serializer.data,
         'draft_transition': draft_transition.id if draft_transition else None,
         'orbits_to_transfer': len(draft_transition.orbits.all()) if draft_transition else None,
-        'orbit_height': orbit_height,
     }
     return Response(response, status=status.HTTP_200_OK)
 
@@ -107,10 +107,8 @@ def add_orbit_to_transition(request, orbit_id):
 
     if draft_transition is None:
         draft_transition = Transition.objects.create(
-            user_id=get_user().id,
-            planned_date=timezone.now().date(),
-            planned_time=timezone.now().time(),
-            spacecraft='Спутник',
+            creation_date=timezone.now().date(),
+            user=User.objects.filter(is_superuser=False).first()
         )
         draft_transition.save()
 
@@ -128,7 +126,7 @@ def add_orbit_to_transition(request, orbit_id):
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     serializer = TransitionSerializer(draft_transition)
-    return Response(serializer.data.get('orbits', []), status=status.HTTP_200_OK)
+    return Response(serializer.get_orbits(draft_transition), status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
@@ -231,7 +229,8 @@ def update_status_user(request, transition_id):
         )
 
     transition.status = 'formed'
-    transition.formation_date = timezone.now()
+    transition.highest_orbit = transition.orbits.aggregate(max_height=Max('height'))['max_height']
+    transition.formation_date = timezone.now().date()
     transition.save()
 
     serializer = TransitionSerializer(transition, many=False)
@@ -255,6 +254,7 @@ def update_status_admin(request, transition_id):
 
     transition.status = request_status
     transition.moderator = get_moderator()
+    transition.completion_date = timezone.now().date()
     transition.save()
 
     serializer = TransitionSerializer(transition, many=False)
@@ -280,13 +280,11 @@ def delete_transition(request, transition_id):
 
 
 @api_view(["DELETE"])
-def delete_orbit_from_transition(request, orbit_transition_id):
+def delete_orbit_from_transition(request, orbit_id, transition_id):
     try:
-        orbit_transition = OrbitTransition.objects.get(pk=orbit_transition_id)
+        orbit_transition = OrbitTransition.objects.get(orbit_id=orbit_id, transition_id=transition_id)
     except OrbitTransition.DoesNotExist:
         return Response({"error": "Связь между орбитой и переходом не найдена"}, status=status.HTTP_404_NOT_FOUND)
-
-    transition_id = orbit_transition.transition_id
 
     orbit_transition.delete()
 
@@ -301,21 +299,37 @@ def delete_orbit_from_transition(request, orbit_transition_id):
 
 
 @api_view(["PUT"])
-def update_orbit_transition(request, orbit_transition_id):
+def update_orbit_transition(request, orbit_id, transition_id):
     try:
-        orbit_transition = OrbitTransition.objects.get(pk=orbit_transition_id)
+        # Получаем связь между орбитой и переходом
+        orbit_transition = OrbitTransition.objects.get(orbit_id=orbit_id, transition_id=transition_id)
     except OrbitTransition.DoesNotExist:
-        return Response({"error": "Переход на орбиту не найден"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "Связь между орбитой и переходом не найдена"}, status=status.HTTP_404_NOT_FOUND)
 
-    position = request.data.get("position")
+    # Получаем текущую позицию
+    current_position = orbit_transition.position
 
-    if position is not None:
-        orbit_transition.position = position
-        orbit_transition.save()
-        serializer = OrbitTransitionSerializer(orbit_transition)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    # Если позиция уже равна 1, то уменьшить её нельзя
+    if current_position == 1:
+        return Response({"error": "Позиция уже минимальная (1), нельзя уменьшить"}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response({"error": "Позиция не предоставлена"}, status=status.HTTP_400_BAD_REQUEST)
+    # Уменьшаем позицию на 1
+    new_position = current_position - 1
+
+    # Обновляем позиции всех других орбитных переходов для этого же transition
+    OrbitTransition.objects.filter(
+        transition_id=transition_id,
+        position=new_position
+    ).update(position=current_position)
+
+    # Устанавливаем новую позицию для текущего orbit_transition
+    orbit_transition.position = new_position
+    orbit_transition.save()
+
+    # Возвращаем обновлённые данные
+    serializer = OrbitTransitionSerializer(orbit_transition)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 @api_view(["POST"])

@@ -5,10 +5,9 @@ from space_orbits.models import *
 class OrbitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Orbit
-        fields = '__all__'
+        fields = ['id', 'height', 'type', 'full_description', 'short_description', 'image']
 
 class TransitionSerializer(serializers.ModelSerializer):
-    orbits = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
     moderator = serializers.SerializerMethodField()
 
@@ -28,7 +27,8 @@ class TransitionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Transition
-        fields = '__all__'
+        fields = ['id', 'planned_date', 'planned_time', 'spacecraft', 'user', 'moderator', 'status', 'creation_date', 'formation_date',
+                  'completion_date', 'highest_orbit']
 
 class OrbitTransitionSerializer(serializers.ModelSerializer):
     class Meta:
