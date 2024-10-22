@@ -223,6 +223,9 @@ h2 {
     margin-top: 10px;
     width: 1300px;
 }
+h2 {
+    margin: 10px;
+}
 
 .date-container{
 

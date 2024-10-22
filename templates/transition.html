@@ -3,7 +3,7 @@
 <main>
     <section class="content">
         <h1>Составление перехода на орбиты</h1>
-        {% if num_of_orbits > 0%}
+        {% if num_of_orbits > 0%}   
             <form>
             <div class="date-container">
                 <h2 class="spacecraft">Космический аппарат: <input type="text" value="{{ transition.spacecraft }}"></h2>
@@ -26,6 +26,7 @@
                 <hr class="separator">
                 {% endfor %}
             </div>
+            <h2>Количество орбит, используемых в переходе: {{ num_of_orbits }}</h2>
             <form method="post" action="/transition/{{ transition.id }}/delete/">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-danger">Удалить переход</button>
