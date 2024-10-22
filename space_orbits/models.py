@@ -40,6 +40,7 @@ class Transition(models.Model):
     creation_date = models.DateField(verbose_name='Дата создания перехода')
     formation_date = models.DateField(null=True, verbose_name='Дата формирования перехода')
     completion_date = models.DateField(null=True, verbose_name='Дата завершения перехода')
+    highest_orbit = models.IntegerField(null=True, verbose_name='Самая высокая орбита')
 
     def __str__(self):
         return f"Transition {self.id} - {self.spacecraft} on {self.planned_date}"
