@@ -21,8 +21,8 @@ class Orbit(models.Model):
 
 
 class Transition(models.Model):
-    planned_date = models.DateField(verbose_name='Запланированная дата')
-    planned_time = models.TimeField(verbose_name='Запланированное время')
+    planned_date = models.DateField(null=True, verbose_name='Запланированная дата')
+    planned_time = models.TimeField(null=True, verbose_name='Запланированное время')
     spacecraft = models.CharField(null=True, max_length=50, verbose_name='Космический аппарат')
     user = models.ForeignKey(User, related_name='transitions', on_delete=models.CASCADE, verbose_name='Пользователь')
     moderator = models.ForeignKey(User, related_name='moderated_transitions', on_delete=models.SET_NULL,
@@ -37,6 +37,9 @@ class Transition(models.Model):
     ]
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft', verbose_name='Статус')
+    creation_date = models.DateField(verbose_name='Дата создания перехода')
+    formation_date = models.DateField(null=True, verbose_name='Дата формирования перехода')
+    completion_date = models.DateField(null=True, verbose_name='Дата завершения перехода')
 
     def __str__(self):
         return f"Transition {self.id} - {self.spacecraft} on {self.planned_date}"
@@ -48,10 +51,8 @@ class OrbitTransition(models.Model):
     position = models.IntegerField(verbose_name='Позиция')
 
     class Meta:
-        unique_together = ('orbit', 'transition')
-        constraints = [
-            UniqueConstraint(fields=['transition', 'position'], name='unique_position_per_transition')
-        ]
+        unique_together = ('transition', 'orbit')
+
 
     def __str__(self):
         return f"OrbitTransition (Orbit {self.orbit.id} - Transition {self.transition.id}, Position {self.position})"

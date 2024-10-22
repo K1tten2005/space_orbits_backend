@@ -33,6 +33,7 @@ def add_orbit(request, orbit_id):
     draft_transition = Transition.objects.filter(status='draft').first()
     if draft_transition is None:
         draft_transition = Transition.objects.create(
+            creation_date=timezone.now().date(),
             planned_date=timezone.now().date(),
             planned_time=timezone.now().time(),
             spacecraft='Спутник',
