@@ -43,7 +43,7 @@ def get_orbit_by_id(request, orbit_id):
     except Orbit.DoesNotExist:
         return Response({'error': 'Орбита не найдена!'}, status=status.HTTP_404_NOT_FOUND)
 
-    serializer = OrbitSerializer(orbit, many=False)
+    serializer = SingleOrbitSerializer(orbit, many=False)
     return Response(serializer.data)
 
 
@@ -116,7 +116,7 @@ def add_orbit_to_transition(request, orbit_id):
         return Response({'error': 'Орбита уже добавлена в перемещение'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     try:
-        orbit_transition = OrbitTransition.objects.create(
+        OrbitTransition.objects.create(
             transition=draft_transition,
             orbit=orbit,
             position=len(draft_transition.orbits.all()) + 1,
@@ -178,7 +178,7 @@ def get_transition_by_id(request, transition_id):
     except Transition.DoesNotExist:
         return Response({"error": "Переход не найден"}, status=status.HTTP_404_NOT_FOUND)
 
-    serializer = TransitionSerializer(transition, many=False)
+    serializer = SingleTransitionSerializer(transition, many=False)
 
     return Response(serializer.data)
 
@@ -288,6 +288,12 @@ def delete_orbit_from_transition(request, orbit_id, transition_id):
 
     orbit_transition.delete()
 
+    remaining_orbits = OrbitTransition.objects.filter(transition_id=transition_id).order_by('position')
+    
+    for index, orbit in enumerate(remaining_orbits, start=1):
+        orbit.position = index
+        orbit.save()
+
     try:
         transition = Transition.objects.get(pk=transition_id)
     except Transition.DoesNotExist:
@@ -301,32 +307,25 @@ def delete_orbit_from_transition(request, orbit_id, transition_id):
 @api_view(["PUT"])
 def update_orbit_transition(request, orbit_id, transition_id):
     try:
-        # Получаем связь между орбитой и переходом
         orbit_transition = OrbitTransition.objects.get(orbit_id=orbit_id, transition_id=transition_id)
     except OrbitTransition.DoesNotExist:
         return Response({"error": "Связь между орбитой и переходом не найдена"}, status=status.HTTP_404_NOT_FOUND)
 
-    # Получаем текущую позицию
     current_position = orbit_transition.position
 
-    # Если позиция уже равна 1, то уменьшить её нельзя
     if current_position == 1:
         return Response({"error": "Позиция уже минимальная (1), нельзя уменьшить"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Уменьшаем позицию на 1
     new_position = current_position - 1
 
-    # Обновляем позиции всех других орбитных переходов для этого же transition
     OrbitTransition.objects.filter(
         transition_id=transition_id,
         position=new_position
     ).update(position=current_position)
 
-    # Устанавливаем новую позицию для текущего orbit_transition
     orbit_transition.position = new_position
     orbit_transition.save()
 
-    # Возвращаем обновлённые данные
     serializer = OrbitTransitionSerializer(orbit_transition)
     return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -7,6 +7,11 @@ class OrbitSerializer(serializers.ModelSerializer):
         model = Orbit
         fields = ['id', 'height', 'type', 'full_description', 'short_description', 'image']
 
+class SingleOrbitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Orbit
+        fields = ['id', 'height', 'type', 'full_description', 'short_description', 'image', 'status']
+
 class TransitionSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     moderator = serializers.SerializerMethodField()
@@ -29,6 +34,34 @@ class TransitionSerializer(serializers.ModelSerializer):
         model = Transition
         fields = ['id', 'planned_date', 'planned_time', 'spacecraft', 'user', 'moderator', 'status', 'creation_date', 'formation_date',
                   'completion_date', 'highest_orbit']
+        
+class SingleTransitionSerializer(serializers.ModelSerializer):
+    orbits = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    moderator = serializers.SerializerMethodField()
+
+    def get_orbits(self, transition):
+        orbit_transitions = OrbitTransition.objects.filter(transition=transition)
+        
+        orbits_data = []
+        for orbit_transition in orbit_transitions:
+            orbit_data = OrbitSerializer(orbit_transition.orbit).data
+            orbit_data['position'] = orbit_transition.position
+            orbits_data.append(orbit_data)
+        
+        return orbits_data
+    
+    def get_user(self, transition):
+        return transition.user.username
+
+    def get_moderator(self, transition):
+        if transition.moderator:
+            return transition.moderator.username
+        return None
+    
+    class Meta:
+        model = Transition
+        fields = '__all__'
 
 class OrbitTransitionSerializer(serializers.ModelSerializer):
     class Meta:
