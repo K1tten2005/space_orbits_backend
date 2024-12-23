@@ -60,4 +60,4 @@ class IsManagerAuth(permissions.BasePermission):
         user = User.objects.filter(username=username).first()
         if user is None:
             return False
-        return user.is_superuser
+        return (user.is_superuser or user.is_staff)

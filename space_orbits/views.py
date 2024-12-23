@@ -28,36 +28,40 @@ from rest_framework.decorators import (
 
 
 @swagger_auto_schema(
-    method="get",
+    method='get',
     manual_parameters=[
         openapi.Parameter(
-            "orbit_height",
-            openapi.IN_QUERY,
-            description="Фильтрация по совпадению высоты орбиты",
-            type=openapi.TYPE_STRING,
-        ),
+            name="orbit_height",
+            in_=openapi.IN_QUERY,
+            description="Фильтрация орбит по высоте (начало строки)",
+            type=openapi.TYPE_STRING
+        )
     ],
     responses={
         status.HTTP_200_OK: openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "orbit": openapi.Schema(
+                "orbits": openapi.Schema(
                     type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(type=openapi.TYPE_OBJECT),
-                    description="Список найденных орбит",
+                    items=openapi.Items(type=openapi.TYPE_OBJECT),
+                    description="Список орбит"
                 ),
                 "draft_transition": openapi.Schema(
                     type=openapi.TYPE_NUMBER,
                     description="ID черновика перехода, если существует",
-                    nullable=True,
+                    nullable=True
+                ),
+                "orbits_to_transfer": openapi.Schema(
+                    type=openapi.TYPE_NUMBER,
+                    description="Количество орбит в черновике",
+                    nullable=True
                 ),
             },
         ),
         status.HTTP_400_BAD_REQUEST: "Неверный запрос",
-        status.HTTP_403_FORBIDDEN: "Доступ запрещен",
+        status.HTTP_403_FORBIDDEN: "Доступ запрещён"
     },
 )
-
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -87,14 +91,6 @@ def get_orbits_list(request):
 
 @swagger_auto_schema(
     method="get",
-    manual_parameters=[
-        openapi.Parameter(
-            name="orbit_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID искомой орбиты"
-        )
-    ],
     responses={
         status.HTTP_200_OK: SingleOrbitSerializer(),
         status.HTTP_404_NOT_FOUND: "Орбита не найдена",
@@ -137,14 +133,6 @@ def create_orbit(request):
 @swagger_auto_schema(
     method="put",
     request_body=CreateUpdateOrbitSerializer,
-    manual_parameters=[
-        openapi.Parameter(
-            name="orbit_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID обновляемой орбиты"
-        )
-    ],
     responses={
         status.HTTP_200_OK: OrbitSerializer(),
         status.HTTP_403_FORBIDDEN: "Вы не вошли в систему как модератор",
@@ -174,14 +162,6 @@ def update_orbit(request, orbit_id):
 
 @swagger_auto_schema(
     method="delete",
-    manual_parameters=[
-        openapi.Parameter(
-            name="orbit_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID удаляемой орбиты"
-        )
-    ],
     responses={
         status.HTTP_200_OK: OrbitSerializer(many=True),
         status.HTTP_403_FORBIDDEN: "Вы не вошли в систему как модератор",
@@ -208,14 +188,6 @@ def delete_orbit(request, orbit_id):
 
 @swagger_auto_schema(
     method="post",
-    manual_parameters=[
-        openapi.Parameter(
-            name="orbit_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID орбиты, добавляемой в переход"
-        )
-    ],
     responses={
         status.HTTP_201_CREATED: TransitionSerializer(),
         status.HTTP_404_NOT_FOUND: "Орбита не найдена",
@@ -224,6 +196,7 @@ def delete_orbit(request, orbit_id):
         status.HTTP_500_INTERNAL_SERVER_ERROR: "Ошибка при создании связки",
     },
 )
+
 @api_view(['POST'])
 @permission_classes([IsAuth])
 @authentication_classes([AuthBySessionID])
@@ -270,14 +243,6 @@ def add_orbit_to_transition(request, orbit_id):
         },
         required=["image"]
     ),
-    manual_parameters=[
-        openapi.Parameter(
-            name="orbit_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID орбиты, для которой загружается/изменяется изображение"
-        )
-    ],
     responses={
         status.HTTP_200_OK: OrbitSerializer(),
         status.HTTP_400_BAD_REQUEST: "Изображение не предоставлено",
@@ -368,19 +333,97 @@ def get_transitions_list(request):
 
 @swagger_auto_schema(
     method="get",
-    manual_parameters=[
-        openapi.Parameter(
-            name="transition_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID искомого перехода",
-        ),
-    ],
-    responses={
-        status.HTTP_200_OK: SingleTransitionSerializer(),
-        status.HTTP_403_FORBIDDEN: "Вы не вошли в систему",
-        status.HTTP_404_NOT_FOUND: "Переход не найден",
-    },
+responses={
+    status.HTTP_200_OK: openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "id": openapi.Schema(
+                type=openapi.TYPE_INTEGER,
+                title="ID",
+                readOnly=True,
+            ),
+            "orbits_to_transfer": openapi.Schema(
+                type=openapi.TYPE_INTEGER,
+                title="Orbits to transfer",
+                readOnly=True,
+            ),
+            "user": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                title="Owner",
+                readOnly=True,
+            ),
+            "orbits": openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                title="Orbits",
+                items=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "height": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "type": openapi.Schema(type=openapi.TYPE_STRING),
+                        "full_description": openapi.Schema(type=openapi.TYPE_STRING),
+                        "short_description": openapi.Schema(type=openapi.TYPE_STRING),
+                        "image": openapi.Schema(type=openapi.TYPE_STRING, format="uri"),
+                    },
+                ),
+                readOnly=True,
+            ),
+            "planned_date": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                format="date",
+                title="Запланированная дата перехода",
+                nullable=True,
+            ),
+            "planned_time": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                format="date",
+                title="Запланированное время перехода",
+                nullable=True,
+            ),
+            "spacecraft": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                title="Название космического аппарата",
+                maxLength=50,
+                nullable=True,
+            ),
+            "moderator": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                title="Moderator",
+                readOnly=True,
+                nullable=True,
+            ),
+            "status": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                title="Статус",
+                enum=["draft", 'deleted', 'formed', 'completed', 'rejected'],
+            ),
+            "creation_date": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                format="date-time",
+                title="Дата создания",
+            ),
+            "formation_date": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                format="date-time",
+                title="Дата формирования",
+                nullable=True,
+            ),
+            "completion_date": openapi.Schema(
+                type=openapi.TYPE_STRING,
+                format="date-time",
+                title="Дата завершения",
+                nullable=True,
+            ),
+            "highest_orbit": openapi.Schema(
+                type=openapi.TYPE_INTEGER,
+                title="Самая высокая орбита",
+                nullable=True,
+            ),
+        },
+    ),
+    status.HTTP_403_FORBIDDEN: "Вы не вошли в систему",
+    status.HTTP_404_NOT_FOUND: "Переход не найден",
+}
 )
 
 @api_view(["GET"])
@@ -391,6 +434,9 @@ def get_transition_by_id(request, transition_id):
         transition = Transition.objects.get(pk=transition_id)
     except Transition.DoesNotExist:
         return Response({"error": "Переход не найден"}, status=status.HTTP_404_NOT_FOUND)
+    
+    if not request.user.is_superuser and transition.user != request.user:  
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
     serializer = SingleTransitionSerializer(transition, many=False)
 
@@ -399,14 +445,6 @@ def get_transition_by_id(request, transition_id):
 
 @swagger_auto_schema(
     method="put",
-    manual_parameters=[
-        openapi.Parameter(
-            name="transition_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID изменяемой заявки",
-        )
-    ],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
@@ -463,14 +501,6 @@ def update_transition(request, transition_id):
 
 @swagger_auto_schema(
     method="put",
-    manual_parameters=[
-        openapi.Parameter(
-            name="transition_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID отправки, формируемой создателем",
-        ),
-    ],
     responses={
         status.HTTP_200_OK: TransitionSerializer(),
         status.HTTP_400_BAD_REQUEST: "Не заполнены обязательные поля: [поля, которые не заполнены]",
@@ -504,7 +534,6 @@ def update_status_user(request, transition_id):
         )
 
     transition.status = 'formed'
-    transition.highest_orbit = transition.orbits.aggregate(max_height=Max('height'))['max_height']
     transition.formation_date = timezone.now().date()
     transition.save()
 
@@ -514,19 +543,11 @@ def update_status_user(request, transition_id):
 
 @swagger_auto_schema(
     method="put",
-    manual_parameters=[
-        openapi.Parameter(
-            name="transition_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID заявки, обрабатываемой модератором",
-        ),
-    ],
     request_body=openapi.Schema(
         type=openapi.TYPE_OBJECT,
         properties={
             "status": openapi.Schema(
-                type=openapi.TYPE_INTEGER,
+                type=openapi.TYPE_STRING,
                 description="Новый статус перехода ('completed' для завершения, 'rejected' для отклонения)",
             ),
         },
@@ -560,6 +581,7 @@ def update_status_admin(request, transition_id):
     transition.status = request_status
     transition.moderator = request.user
     transition.completion_date = timezone.now().date()
+    transition.highest_orbit = transition.orbits.aggregate(max_height=Max('height'))['max_height']
     transition.save()
 
     serializer = TransitionSerializer(transition, many=False)
@@ -569,14 +591,6 @@ def update_status_admin(request, transition_id):
 
 @swagger_auto_schema(
     method="delete",
-    manual_parameters=[
-        openapi.Parameter(
-            name="transition_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID удаляемого перехода",
-        ),
-    ],
     responses={
         status.HTTP_200_OK: TransitionSerializer(),
         status.HTTP_403_FORBIDDEN: "Доступ запрещен",
@@ -609,22 +623,8 @@ def delete_transition(request, transition_id):
 
 @swagger_auto_schema(
     method="delete",
-    manual_parameters=[
-        openapi.Parameter(
-            name="orbit_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID орбиты в переходе"
-        ),
-        openapi.Parameter(
-            name="transition_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID перехода"
-        ),
-    ],
     responses={
-        status.HTTP_200_OK: TransitionSerializer(),
+        status.HTTP_200_OK: OrbitSerializer(many=True),
         status.HTTP_403_FORBIDDEN: "Доступ запрещен",
         status.HTTP_404_NOT_FOUND: "Связь между орбитой и переходом не найдена",
     },
@@ -633,7 +633,7 @@ def delete_transition(request, transition_id):
 @api_view(["DELETE"])
 @permission_classes([IsAuth])
 @authentication_classes([AuthBySessionID])
-def delete_orbit_from_transition(request, orbit_id, transition_id):
+def delete_orbit_from_transition(request, transition_id, orbit_id):
     try:
         orbit_transition = OrbitTransition.objects.get(orbit_id=orbit_id, transition_id=transition_id)
     except OrbitTransition.DoesNotExist:
@@ -650,31 +650,14 @@ def delete_orbit_from_transition(request, orbit_id, transition_id):
         orbit.position = index
         orbit.save()
 
-    try:
-        transition = Transition.objects.get(pk=transition_id)
-    except Transition.DoesNotExist:
-        return Response({"error": "Переход не найден после удаления орбиты"}, status=status.HTTP_404_NOT_FOUND)
+    orbits = Orbit.objects.filter(id__in=OrbitTransition.objects.filter(transition=transition_id).values_list("orbit", flat=True))
 
-    serializer = TransitionSerializer(transition, many=False)
+    serializer = OrbitSerializer(orbits, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @swagger_auto_schema(
     method="put",
-    manual_parameters=[
-        openapi.Parameter(
-            name="orbit_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID орбиты в переходе"
-        ),
-        openapi.Parameter(
-            name="transition_id",
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="ID перехода"
-        ),
-    ],
     responses={
         status.HTTP_200_OK: OrbitTransitionSerializer(),
         status.HTTP_403_FORBIDDEN: "Доступ запрещен",
@@ -748,14 +731,25 @@ def register(request):
         ),
     ],
     responses={
-        status.HTTP_200_OK: "OK",
-        status.HTTP_400_BAD_REQUEST: "Bad Request",
+        status.HTTP_200_OK: openapi.Response(
+            description="User successfully logged in",
+            schema=UserSerializer()
+        ),
+        status.HTTP_400_BAD_REQUEST:  openapi.Response(
+            description="Invalid credentials",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    "error": openapi.Schema(type=openapi.TYPE_STRING)
+                }
+            )
+        ),
     },
 )
 
 
 @api_view(["POST"])
-@parser_classes((MultiPartParser, FormParser))
+@parser_classes((FormParser,))
 @permission_classes([AllowAny])
 def login(request):
     username = request.data.get("username")
@@ -764,8 +758,9 @@ def login(request):
     if user is not None:
         session_id = str(uuid.uuid4())
         session_storage.set(session_id, username)
-        response = Response(status=status.HTTP_200_OK)
-        response.set_cookie("session_id", session_id, samesite="Lax")
+        serializer = UserSerializer(user)
+        response = Response(serializer.data, status=status.HTTP_200_OK)
+        response.set_cookie("session_id", session_id, samesite="lax")
         return response
     return Response(
         {"error": "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST
@@ -784,9 +779,12 @@ def login(request):
 @permission_classes([IsAuth])
 def logout(request):
     session_id = request.COOKIES["session_id"]
+    print(session_id)
     if session_storage.exists(session_id):
         session_storage.delete(session_id)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        response = Response(status=status.HTTP_204_NO_CONTENT) 
+        response.delete_cookie("session_id") 
+        return response 
     return Response(status=status.HTTP_403_FORBIDDEN)
 
 
@@ -805,8 +803,12 @@ def logout(request):
 @permission_classes([IsAuth])
 @authentication_classes([AuthBySessionID])
 def update_user(request):
-    serializer = UserSerializer(request.user, data=request.data, partial=True)
+    cleaned_data = {key: value for key, value in request.data.items() if value != ""}
+    print("Received cleaned request data:", cleaned_data)
+    
+    serializer = UserSerializer(request.user, data=cleaned_data, partial=True)
     if serializer.is_valid():
+        print("Validated successfully")
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

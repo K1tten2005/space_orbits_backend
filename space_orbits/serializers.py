@@ -99,8 +99,9 @@ class OrbitTransitionSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'password', 'first_name', 'last_name', 'username')
-        extra_kwargs = {"password": {"write_only": True}}
+        fields = ('id', 'email', 'password', 'first_name', 'last_name', 'username', 'is_staff')
+        extra_kwargs = {"password": {"write_only": True},
+                        "is_staff": {"default": False}}
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -109,13 +110,26 @@ class UserSerializer(serializers.ModelSerializer):
             first_name=validated_data["first_name"],
             last_name=validated_data["last_name"],
             email=validated_data.get("email", ""),
+            is_staff=validated_data.get("is_staff", False),
         )
         return user
 
     def update(self, instance, validated_data):
-        instance.email = validated_data.get("email", instance.email)
-        if "password" in validated_data:
-            instance.set_password(validated_data["password"])
+        print("Received validated data:", validated_data)
+
+        if 'email' in validated_data:
+            instance.email = validated_data['email']
+        if 'first_name' in validated_data:
+            instance.first_name = validated_data['first_name']
+        if 'last_name' in validated_data:
+            instance.last_name = validated_data['last_name']
+        if 'password' in validated_data:
+            print("Password from validated_data:", validated_data['password'])
+            instance.set_password(validated_data['password'])
+        if 'username' in validated_data:
+            instance.username = validated_data['username']
+
         instance.save()
+        print("Instance saved successfully with updated data")
         return instance
 

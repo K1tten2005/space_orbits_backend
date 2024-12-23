@@ -29,7 +29,7 @@ urlpatterns = [
     path('api/orbits/create/', create_orbit, name='create_orbit'),  # POST
     path('api/orbits/<int:orbit_id>/update/', update_orbit, name='update_orbit'),  # PUT
     path('api/orbits/<int:orbit_id>/delete/', delete_orbit, name='delete_orbit'),  # DELETE
-    path('api/orbits/<int:orbit_id>/add_orbit_to_transition/', add_orbit_to_transition, name='add_orbit_to_transition'),  # POST
+    path('api/orbits/<int:orbit_id>/add_to_transition/', add_orbit_to_transition, name='add_orbit_to_transition'),  # POST
     path('api/orbits/<int:orbit_id>/update_image/', update_orbit_image, name='update_image'),  # POST
 
     # Набор методов для заявок
@@ -41,14 +41,14 @@ urlpatterns = [
     path('api/transitions/<int:transition_id>/delete/', delete_transition, name='delete_transition'),  # DELETE
 
     # Набор методов для м-м
-    path('api/orbit/<int:orbit_id>/transition/<int:transition_id>/update_orbit_transition/', update_orbit_transition,
+    path('api/transitions/<int:transition_id>/update_orbit_transition/<int:orbit_id>/', update_orbit_transition,
          name='update_orbit_transition'),  # PUT
-    path('api/orbit/<int:orbit_id>/transition/<int:transition_id>/delete_orbit_transition/', delete_orbit_from_transition,
-         name='delete_orbit_transition'),  # DELETE
+    path('api/transitions/<int:transition_id>/delete_orbit_from_transition/<int:orbit_id>/', delete_orbit_from_transition,
+         name='delete_orbit_from_transition'),  # DELETE
 
     # Набор методов пользователей
     path('api/users/register/', register, name='register'),  # POST
     path('api/users/login/', login, name='login'),  # POST
     path('api/users/logout/', logout, name='logout'),  # POST
-    path('api/users/<int:user_id>/update/', update_user, name='update_user'),  # PUT
+    path('api/users/update/', update_user, name='update_user'),  # PUT
 ]
